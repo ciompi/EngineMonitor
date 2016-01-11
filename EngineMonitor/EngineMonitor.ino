@@ -48,6 +48,12 @@ void printInfo(String key, String value){
   }
 }
 
+void printWorking(){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("    Working...");
+}
+
 
 void setLedOn(){
   digitalWrite(ledPin, HIGH); 
@@ -80,8 +86,14 @@ void displaySensor(ZSensor sensor){
   
   // Determine sensor type
   if(sensor.type == 1){
-    sensors.requestTemperatures();
+    
+    //Serial.println("requestTemperatures");
+    //sensors.requestTemperatures();
+    //Serial.println("requestTemperaturesByAddress");
+    sensors.requestTemperaturesByAddress(sensor.devAddr);
+    //Serial.println("getTempF");
     tempF = sensors.getTempF(sensor.devAddr);
+    //Serial.println("Done");    
     printInfo(sensor.desc, tempF); 
   } 
   else if(sensor.type == 2){
@@ -122,7 +134,7 @@ void loop() {
   //Serial.println("Looping");
   // Determine if Next has been pressed
   if (digitalRead(buttonPin) == HIGH){
-    delay(50);
+    delay(5);
     if (digitalRead(buttonPin) == HIGH){
       lastButtonState = HIGH;
     }
@@ -130,6 +142,7 @@ void loop() {
   
   if (digitalRead(buttonPin) == LOW && lastButtonState == HIGH) {
     Serial.println("Button Released");
+    printWorking();
     // Move to the next sensor
     if (currSensor < 9){
       currSensor++;

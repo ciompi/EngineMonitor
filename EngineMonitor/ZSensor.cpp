@@ -39,7 +39,7 @@ class ZSensorFactory
       zensors[1].type = 1;
       zensors[1].desc = "Raw Water Out";      
       zensors[1].currVal = -1;    
-      memcpy(zensors[2].devAddr, RawWaterOut, 8);
+      memcpy(zensors[1].devAddr, RawWaterOut, 8);
       
       zensors[2].id = 3;
       zensors[2].type = 1;
