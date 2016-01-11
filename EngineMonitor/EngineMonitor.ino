@@ -1,111 +1,145 @@
-
 #include <OneWire.h>
 #include <LiquidCrystal.h>
 #include <DallasTemperature.h>
+#include "ZSensor.cpp"
 
-// initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 #define ONE_WIRE_BUS 10
-
 OneWire oneWire(ONE_WIRE_BUS);
-
 DallasTemperature sensors(&oneWire);
 
-void getRpm(){
-  
-  
+ZSensor zensors[9];          // list of sensors with attributes
+const int buttonPin = 7;     // the pin that the pushbutton is attached to
+const int ledPin = 6;        // the pin that the LED is attached to
+int currSensor = 1;          // 1 through 9
+bool lastButtonState = LOW;
+String lastKeyPrinted;
+String lastValPrinted;
+
+
+int getRpm(){
+  return 2200;
 }
 
+
+void printInfo(String key, int value){
+  String val = String(value);
+  printInfo(key, val);
+}
+
+
+void printInfo(String key, float value){
+  String val = String(value);
+  printInfo(key, val);
+}
+
+
+void printInfo(String key, String value){
+  
+  if(lastKeyPrinted != key || lastValPrinted != value){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(key);
+    lcd.setCursor(0, 1);
+    lcd.print(value);  
+    lastKeyPrinted = key;
+    lastValPrinted = value;
+  }
+}
+
+
+void setLedOn(){
+  digitalWrite(ledPin, HIGH); 
+}
+
+
+void setLedOff(){
+  digitalWrite(ledPin, LOW); 
+}
+
+
+void printWarning (String key, String value){
+
+  setLedOn();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("WARNING");
+  lcd.setCursor(0, 1);
+  lcd.print(key);  
+  delay(500);
+  
+  printInfo(key, value);
+  delay(500);
+  
+  setLedOff();
+}
+
+void displaySensor(ZSensor sensor){
+  float tempF;
+  
+  // Determine sensor type
+  if(sensor.type == 1){
+    sensors.requestTemperatures();
+    tempF = sensors.getTempF(sensor.devAddr);
+    printInfo(sensor.desc, tempF); 
+  } 
+  else if(sensor.type == 2){
+    printWarning(sensor.desc, "Not Implemented");
+  }
+  else if(sensor.type == 3){
+    printInfo( sensor.desc, getRpm());     
+  }
+}
+
+
 void setup() {
-  // set up the LCD's number of columns and rows:
+  Serial.begin(9600);
+  Serial.println("Begin setup");
+   // initialize the button pin as a input:
+  pinMode(buttonPin, INPUT);
+
+  // initialize the LED as an output:
+  pinMode(ledPin, OUTPUT);
+
+  // turn on the led during startup
+  digitalWrite(ledPin, HIGH);  // turn LED ON
+
   lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.autoscroll();
-  lcd.print("Engine Monitoring System");
-  delay(1000);
-  lcd.noAutoscroll();
+  printInfo("Engine Monitor", "Starting Up");
+
+  ZSensorFactory factory;
+  factory.initZSensors(zensors);
+  delay(500);
   sensors.begin();
+  digitalWrite(ledPin, LOW);
+  
+  Serial.println("Complete setup");
+  
 }
 
 void loop() {
-  sensors.requestTemperatures();
-  lcd.clear();
-  // set the cursor to column 0, line 1
-  // (note: line 1 is the second row, since counting begins with 0):
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature 0");
-  lcd.setCursor(0, 1);
-  lcd.print(sensors.getTempCByIndex(0));  
-  delay(1000);
+  //Serial.println("Looping");
+  // Determine if Next has been pressed
+  if (digitalRead(buttonPin) == HIGH){
+    delay(50);
+    if (digitalRead(buttonPin) == HIGH){
+      lastButtonState = HIGH;
+    }
+  }
+  
+  if (digitalRead(buttonPin) == LOW && lastButtonState == HIGH) {
+    Serial.println("Button Released");
+    // Move to the next sensor
+    if (currSensor < 9){
+      currSensor++;
+    } else {
+      currSensor = 1;
+    }
+    lastButtonState = LOW;
+  } 
+  
+  displaySensor(zensors[currSensor - 1]);
 
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature 1");
-  lcd.setCursor(0, 1);
-  lcd.print(sensors.getTempCByIndex(1));  
-  delay(1000);
-  
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature 2");
-  lcd.setCursor(0, 1);
-  lcd.print(sensors.getTempCByIndex(2));  
-  delay(1000);
-  
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature 3");
-  lcd.setCursor(0, 1);
-  lcd.print(sensors.getTempCByIndex(3));  
-  delay(1000);
-  
-  lcd.setCursor(0, 0);
-  lcd.print("Temperature 4");
-  lcd.setCursor(0, 1);
-  lcd.print(sensors.getTempCByIndex(4));  
-  delay(1000);
 }
 
-
-/*
-Address Data:
-ROM = 28 3F 72 8B 6 0 0 A5
-
-  Chip = DS18B20
-
-  Data = 1 20 1 4B 46 7F FF 10 10 FC  CRC=FC
-
-  Temperature = 18.00 Celsius, 64.40 Fahrenheit
-
-ROM = 28 FF C0 2B 73 15 3 74
-
-  Chip = DS18B20
-
-  Data = 1 29 1 4B 1 7F FF C 10 8C  CRC=8C
-
-  Temperature = 18.56 Celsius, 65.41 Fahrenheit
-
-ROM = 28 FF F2 CD 72 15 1 24
-
-  Chip = DS18B20
-
-  Data = 1 2F 1 4B 1 7F FF C 10 1F  CRC=1F
-
-  Temperature = 18.94 Celsius, 66.09 Fahrenheit
-
-ROM = 28 FF 7D 2 64 15 1 B8
-
-  Chip = DS18B20
-
-  Data = 1 28 1 80 80 1F FF 80 80 4D  CRC=4D
-
-  Temperature = 18.50 Celsius, 65.30 Fahrenheit
-
-ROM = 28 FF 43 30 73 15 3 5D
-
-  Chip = DS18B20
-
-  Data = 1 25 1 4B 1 7F FF C 10 B3  CRC=B3
-
-  Temperature = 18.31 Celsius, 64.96 Fahrenheit
-
-No more addresses.
-*/
