@@ -9,17 +9,65 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-ZSensor zensors[9];          // list of sensors with attributes
-const int buttonPin = 7;     // the pin that the pushbutton is attached to
-const int ledPin = 6;        // the pin that the LED is attached to
-int currSensor = 1;          // 1 through 9
+ZSensor zensors[9];          // List of sensors with attributes
+const int ledPin = 6;        // Pin connected to LED
+const int buttonPin = 7;     // Pin connected to pushbutton
+const int hallPin = 8;        // Pin connected to Hall sensor
+int currSensor = 1;          // Indicates the sensor currently displayed on the LCD screen
 bool lastButtonState = LOW;
 String lastKeyPrinted;
 String lastValPrinted;
 
 
 int getRpm(){
-  return 2200;
+  
+  unsigned long startTime;
+  unsigned long deltaMillis;
+  unsigned int rpm;
+  int hallReading;
+  int priorHallReading = LOW;
+  bool changed;
+  bool normalOps = true;
+  
+  startTime = millis();
+  
+  // Count ten revolutions
+  for (int i = 0; i < 10; i++){
+
+    changed = false;
+    
+    while (normalOps && !changed){
+      hallReading = digitalRead(hallPin);
+  
+      // Might need to debounce
+      if (hallReading != priorHallReading){
+        changed = true;
+      }
+  
+      priorHallReading = hallReading;
+
+      // Prevent system from hanging if taking too long
+      if((millis() - startTime) > 1000){
+        normalOps = false;
+      }
+    }
+
+    // Taking too long to get a reading
+    if (!normalOps){
+      return -1;
+    }
+  }
+
+  // Milliseconds for 10 revolutions
+  deltaMillis = millis() - startTime;
+
+  float oneRev = 10 / deltaMillis;
+
+  float fltRpm = 60000 / oneRev;
+
+  rpm = (int) fltRpm;  
+
+  return rpm;
 }
 
 
@@ -82,25 +130,25 @@ void printWarning (String key, String value){
 }
 
 void displaySensor(ZSensor sensor){
-  float tempF;
-  
+ 
   // Determine sensor type
   if(sensor.type == 1){
-    
-    //Serial.println("requestTemperatures");
-    //sensors.requestTemperatures();
-    //Serial.println("requestTemperaturesByAddress");
     sensors.requestTemperaturesByAddress(sensor.devAddr);
-    //Serial.println("getTempF");
-    tempF = sensors.getTempF(sensor.devAddr);
-    //Serial.println("Done");    
-    printInfo(sensor.desc, tempF); 
+    printInfo(sensor.desc, sensors.getTempF(sensor.devAddr)); 
   } 
+  
   else if(sensor.type == 2){
     printWarning(sensor.desc, "Not Implemented");
   }
+  
   else if(sensor.type == 3){
-    printInfo( sensor.desc, getRpm());     
+    int rpm = getRpm();
+
+    if (rpm == -1){
+      printInfo( sensor.desc, "Not Detected");
+    } else {
+      printInfo( sensor.desc, rpm);  
+    }
   }
 }
 
@@ -108,10 +156,10 @@ void displaySensor(ZSensor sensor){
 void setup() {
   Serial.begin(9600);
   Serial.println("Begin setup");
-   // initialize the button pin as a input:
+  
+   // initialize pins
   pinMode(buttonPin, INPUT);
-
-  // initialize the LED as an output:
+  pinMode(hallPin, INPUT);
   pinMode(ledPin, OUTPUT);
 
   // turn on the led during startup
