@@ -18,20 +18,19 @@ bool lastButtonState = LOW;
 String lastKeyPrinted;
 String lastValPrinted;
 
-
 int getRpm(){
   
   unsigned long startTime;
   unsigned long deltaMillis;
-  unsigned int rpm;
-  int hallReading;
-  int priorHallReading = LOW;
-  bool changed;
+  int rpm = -2;
+  int hallReading = HIGH;
+  int priorHallReading = HIGH;
+  bool changed = false;
   bool normalOps = true;
-  
+
   startTime = millis();
   
-  // Count ten revolutions
+  // Count ten revolutions, only counting the transitions from LOW to HIGH.  Tested up to 2600 RPMs
   for (int i = 0; i < 10; i++){
 
     changed = false;
@@ -39,29 +38,40 @@ int getRpm(){
     while (normalOps && !changed){
       hallReading = digitalRead(hallPin);
   
-      // Might need to debounce
-      if (hallReading != priorHallReading){
+      if (hallReading == HIGH && priorHallReading == LOW){
         changed = true;
       }
   
       priorHallReading = hallReading;
 
+      int testDeltaMillis = millis() - startTime;
+
       // Prevent system from hanging if taking too long
-      if((millis() - startTime) > 1000){
+      if(testDeltaMillis > 2000){
         normalOps = false;
+        String strTestDeltaMillis = String(testDeltaMillis);
+        Serial.print("Took too long.  Milliseconds between change: ");
+        Serial.println(strTestDeltaMillis);
       }
     }
 
     // Taking too long to get a reading
     if (!normalOps){
+      Serial.print("Abnormal Operations");
       return -1;
     }
+
+    String sensorState = String(hallReading);
   }
 
   // Milliseconds for 10 revolutions
   deltaMillis = millis() - startTime;
+  String strDeltaMillis = String(deltaMillis);
+  Serial.print("Milliseconds for 10 revolutions: ");
+  Serial.println(strDeltaMillis);
 
-  float oneRev = 10 / deltaMillis;
+
+  float oneRev = deltaMillis / 10;
 
   float fltRpm = 60000 / oneRev;
 
