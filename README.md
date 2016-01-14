@@ -9,3 +9,5 @@ This is a monitoring tool for marine diesel engines.  It should not be considere
 *  Marine engine monitoring systems are very expensive and this device can be built for around $100
 
 Instructions are on the [Wiki](https://bitbucket.org/R_P_Ryan/enginemonitor/wiki/Home)
+
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
