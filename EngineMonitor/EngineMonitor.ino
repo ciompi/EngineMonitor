@@ -5,9 +5,14 @@
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-#define ONE_WIRE_BUS 10
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
+#define ONE_WIRE_BUS_A 9
+#define ONE_WIRE_BUS_B 10
+
+OneWire oneWireA(ONE_WIRE_BUS_A);
+OneWire oneWireB(ONE_WIRE_BUS_B);
+
+DallasTemperature sensorsA(&oneWireA);
+DallasTemperature sensorsB(&oneWireB);
 
 ZSensor zensors[9];          // List of sensors with attributes
 const int ledPin = 6;        // Pin connected to LED
@@ -143,12 +148,13 @@ void displaySensor(ZSensor sensor){
  
   // Determine sensor type
   if(sensor.type == 1){
-    sensors.requestTemperaturesByAddress(sensor.devAddr);
-    printInfo(sensor.desc, sensors.getTempF(sensor.devAddr)); 
+    sensorsA.requestTemperaturesByAddress(sensor.devAddr);
+    printInfo(sensor.desc, sensorsA.getTempF(sensor.devAddr)); 
   } 
   
   else if(sensor.type == 2){
-    printWarning(sensor.desc, "Not Implemented");
+    sensorsB.requestTemperaturesByAddress(sensor.devAddr);
+    printInfo(sensor.desc, sensorsB.getTempF(sensor.devAddr)); 
   }
   
   else if(sensor.type == 3){
@@ -161,6 +167,29 @@ void displaySensor(ZSensor sensor){
     }
   }
 }
+
+void testTempSensors(){
+
+  String twine;
+
+  for(int i; i<8; i++){
+    if(zensors[i].type == 1){
+      sensorsA.requestTemperaturesByAddress(zensors[i].devAddr);
+      twine = String(sensorsA.getTempF(zensors[i].devAddr));
+    } 
+    else if(zensors[i].type == 2){
+      sensorsB.requestTemperaturesByAddress(zensors[i].devAddr);
+      twine = String(sensorsB.getTempF(zensors[i].devAddr));
+    }
+      Serial.print(zensors[i].desc);
+      Serial.print(": ");
+      Serial.println(twine);    
+  }
+}
+
+
+
+
 
 
 void setup() {
@@ -181,10 +210,13 @@ void setup() {
   ZSensorFactory factory;
   factory.initZSensors(zensors);
   delay(500);
-  sensors.begin();
+  sensorsA.begin();
+  sensorsB.begin();
   digitalWrite(ledPin, LOW);
   
   Serial.println("Complete setup");
+
+  testTempSensors();
   
 }
 
