@@ -17,6 +17,8 @@ class ZSensorFactory
    public:
     void initZSensors(ZSensor * zensors){
 
+      //  You need to update these addresses with the ones that match your sensors.  Run DiscoverAddresses to retrieve the 
+      //  addresses for your sensors
       DeviceAddress RawWaterIn  =  { 0x28, 0xD2, 0x22, 0x10, 0x07, 0x00, 0x00, 0x8D }; 
       DeviceAddress RawWaterOut =  { 0x28, 0xEA, 0x9B, 0x0F, 0x07, 0x00, 0x00, 0xDF }; 
       DeviceAddress CoolantIn   =  { 0x28, 0x2E, 0x13, 0x10, 0x07, 0x00, 0x00, 0xCB }; 
