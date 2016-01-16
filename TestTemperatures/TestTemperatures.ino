@@ -26,6 +26,10 @@ void printAddress(DeviceAddress addr){
 }
 
 void testTempSensors(){
+
+  DS18B20s.begin();
+  MAX31850s.begin();
+  
   DeviceAddress addr;
   
   Serial.println("\n\n **** Testing DS18B20 Sensors ****");
@@ -111,8 +115,16 @@ void testTempSensors(){
   MAX31850s.requestTemperatures();
   Serial.print("Index 0: "); Serial.println(MAX31850s.getTempFByIndex(0));
   Serial.print("Index 1: "); Serial.println(MAX31850s.getTempFByIndex(1));
-  
 
+}
+
+
+void testThermocouple(){
+  MAX31850s.begin();
+  MAX31850s.requestTemperatures();
+  float fltVal = MAX31850s.getTempFByIndex(0);
+  String strVal = String(fltVal);
+  Serial.print("Index 0: "); Serial.println(strVal);
 }
 
 
