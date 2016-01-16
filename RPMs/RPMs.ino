@@ -31,7 +31,7 @@ int getRpm(){
       int testDeltaMillis = millis() - startTime;
 
       // Prevent system from hanging if taking too long
-      if(testDeltaMillis > 2000){
+      if(testDeltaMillis > 4000){
         normalOps = false;
         String strTestDeltaMillis = String(testDeltaMillis);
         Serial.print("Took too long.  Milliseconds between change: ");
@@ -78,7 +78,6 @@ int getMillisBetweenPulses(){
   startTime = millis();
 
   while (!changed){
-    
   
     hallReading = digitalRead(hallPin);
 
@@ -98,7 +97,7 @@ int getMillisBetweenPulses(){
     }
   }
   
-  return 303;
+  return deltaMillis;
 }
 
 void testPerformance(){

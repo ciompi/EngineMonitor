@@ -43,7 +43,7 @@ void testTempSensors(){
     Serial.print("Index: ");      Serial.print(i); 
     Serial.print(" Address: ");   printAddress(addr);
     Serial.print(" Temp C: ");    Serial.print(DS18B20s.getTempCByIndex(i));
-    Serial.print(" Temp F: ");    Serial.println(DS18B20s.getTempCByIndex(i));
+    Serial.print(" Temp F: ");    Serial.println(DS18B20s.getTempFByIndex(i));
   }
 
 
@@ -119,25 +119,43 @@ void testTempSensors(){
 }
 
 
-void testThermocouple(){
-  MAX31850s.begin();
+void testThermocouple(int index){
+  
+  DeviceAddress addr;
+  
+  //MAX31850s.begin();
   MAX31850s.requestTemperatures();
-  float fltVal = MAX31850s.getTempFByIndex(0);
+
+  MAX31850s.getAddress(addr, index);
+    
+  Serial.print(" Address: ");   printAddress(addr);
+  Serial.print(" Temp C: ");    Serial.print(MAX31850s.getTempCByIndex(index));
+  Serial.print(" Temp F: ");    Serial.println(MAX31850s.getTempFByIndex(index));
+
+  float fltVal = MAX31850s.getTempFByIndex(index);
   String strVal = String(fltVal);
-  Serial.print("Index 0: "); Serial.println(strVal);
+  Serial.print("Index: "); Serial.print(index); Serial.print(" Temp: "); Serial.println(strVal);
 }
+
+
+
 
 
 void setup() {
   Serial.begin(9600);
   
-  DS18B20s.begin();
+  //DS18B20s.begin();
   MAX31850s.begin();
 
 }
 
 void loop() {
+  Serial.println("******  Testing Thermocouples  ******");
+  testThermocouple(0);
+  testThermocouple(1);  
+  Serial.println("\n******  Testing All Temp Sensors  ******");  
   testTempSensors();
+  Serial.println("******  Done  ******\n\n");  
   delay(5000);
 }
 

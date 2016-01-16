@@ -5,17 +5,16 @@
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-#define ONE_WIRE_BUS_A 9
-#define ONE_WIRE_BUS_B 10
+#define MAX31850_BUS 9
+#define DS18B20_BUS 10
 
-OneWire oneWireA(ONE_WIRE_BUS_A);
-OneWire oneWireB(ONE_WIRE_BUS_B);
+OneWire oneWireMAX31850(MAX31850_BUS);
+OneWire oneWireDS18B20(DS18B20_BUS);
 
-DallasTemperature sensorsA(&oneWireA);
-DallasTemperature sensorsB(&oneWireB);
+DallasTemperature MAX31850sensors(&oneWireMAX31850);
+DallasTemperature DS18B20sensors(&oneWireDS18B20);
 
 ZSensor zensors[9];          // List of sensors with attributes
-const int ledPin = 6;        // Pin connected to LED
 const int buttonPin = 7;     // Pin connected to pushbutton
 const int hallPin = 8;        // Pin connected to Hall sensor
 int currSensor = 1;          // Indicates the sensor currently displayed on the LCD screen
@@ -143,13 +142,13 @@ void displaySensor(ZSensor sensor){
  
   // Determine sensor type
   if(sensor.type == 1){
-    sensorsA.requestTemperaturesByAddress(sensor.devAddr);
-    printSensor(sensor.id, String(sensorsA.getTempF(sensor.devAddr))); 
+    DS18B20sensors.requestTemperaturesByAddress(sensor.devAddr);
+    printSensor(sensor.id, String(DS18B20sensors.getTempF(sensor.devAddr))); 
   } 
   
   else if(sensor.type == 2){
-    sensorsB.requestTemperaturesByAddress(sensor.devAddr);
-    printSensor(sensor.id, String(sensorsB.getTempF(sensor.devAddr))); 
+    MAX31850sensors.requestTemperaturesByAddress(sensor.devAddr);
+    printSensor(sensor.id, String(MAX31850sensors.getTempF(sensor.devAddr))); 
   }
   
   else if(sensor.type == 3){
@@ -170,9 +169,6 @@ void setup() {
   
   pinMode(buttonPin, INPUT);
   pinMode(hallPin, INPUT);
-  pinMode(ledPin, OUTPUT);
-
-  digitalWrite(ledPin, HIGH);  
 
   lcd.begin(16, 2);
   printWorking();
@@ -180,9 +176,8 @@ void setup() {
   ZSensorFactory factory;
   factory.initZSensors(zensors);
   delay(500);
-  sensorsA.begin();
-  sensorsB.begin();
-  digitalWrite(ledPin, LOW);
+  MAX31850sensors.begin();
+  DS18B20sensors.begin();
   
   //Serial.println("Complete setup");
 
