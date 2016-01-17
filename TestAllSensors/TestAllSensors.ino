@@ -17,18 +17,36 @@ const int hallPin = 8;
 const int buttonPin = 7;
 
 
+void testButton(){
+  bool buttonPressed = false;
+  int buttonState = digitalRead(buttonPin);
+  Serial.println("\n********* testButton **********");
+  Serial.print("Button State is: "); Serial.println(buttonState); 
+  Serial.println("Press Button");
+  while (!buttonPressed){
+    buttonState = digitalRead(buttonPin);
+    if(buttonState == HIGH){
+      buttonPressed = true;
+      Serial.println("\n** Button Pressed **");
+    }
+  }
+}
+
+
 void testLCD(){
-  Serial.println("\n***** testLCD *****");
+  Serial.println("\n********** testLCD ************");
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Printing Row One");
   lcd.setCursor(0, 1);
   lcd.print("0123456789ABCDEF");  
+  Serial.println("Verify LCD printout");
+  delay(5000);
 }
 
 
 void testDS18B20Sensors(){
-  Serial.println("\n***** testDS18B20Sensors *****");
+  Serial.println("\n****** testDS18B20Sensors *****");
   DS18B20s.begin();
   DS18B20s.requestTemperatures();
   Serial.print("Index 0: "); Serial.println(DS18B20s.getTempFByIndex(0));
@@ -39,6 +57,7 @@ void testDS18B20Sensors(){
   Serial.print("Index 5: "); Serial.println(DS18B20s.getTempFByIndex(5));
 }
 
+
 void testMAX31850Sensors(){
   Serial.println("\n***** testMAX31850Sensors *****");  
   MAX31850s.begin();
@@ -48,34 +67,25 @@ void testMAX31850Sensors(){
 }
 
 
-// Wave the magnet across the sensor
 void testHallSensor(){
-  Serial.println("\n***** testHallSensor *****");
+  Serial.println("\n******* testHallSensor ********");
+  Serial.println("Wave magnet near sensor");
   unsigned long startTime;
   unsigned long deltaMillis;
   int hallReading = HIGH;
   int priorHallReading = HIGH;
   bool changed = false;
-
   startTime = millis();
 
   while (!changed){
-  
     hallReading = digitalRead(hallPin);
-
     if(hallReading != priorHallReading){
-  
       String sensorState = String(hallReading);
-      Serial.print("Magnet change detected: ");
-      Serial.println(sensorState);
-      
+      Serial.print("Magnet change detected: "); Serial.println(sensorState);
       deltaMillis = millis() - startTime;
       String twine = String(deltaMillis);
-      Serial.print("Milliseconds between change: ");
-      Serial.println(twine);
-
+      Serial.print("Milliseconds between change: "); Serial.println(twine);
       changed = true;
-      
     }
   }
 }
@@ -86,7 +96,7 @@ void setup() {
   pinMode(hallPin, INPUT);
   lcd.begin(16, 2);
 
-  Serial.print("\n\n\n");
+  Serial.print("\n\n");
   Serial.println("*******************************");  
   Serial.println("***** Testing All Sensors *****");  
   Serial.println("*******************************");  
@@ -95,20 +105,20 @@ void setup() {
 
 
 void loop() {
-  Serial.print("\n\n");
-  Serial.println("**************************");  
-  Serial.println("***** Starting Tests *****");  
-  Serial.println("**************************");  
+  Serial.println("*******************************");  
+  Serial.println("******  Starting Tests  *******");  
+  Serial.println("*******************************");  
   Serial.print("\n");
   
-  testDS18B20Sensors();
-  testMAX31850Sensors();
-  testHallSensor();
-  testLCD();
-
-  Serial.println("**************************");  
-  Serial.println("***** Finished Tests *****"); 
-  Serial.println("**************************\n");  
+  testDS18B20Sensors(); delay(1000);
+  testMAX31850Sensors();  delay(1000);
+  testHallSensor();  delay(1000);
+  testButton();  delay(1000);
+  testLCD();  delay(1000);
+  
+  Serial.println("\n*******************************");  
+  Serial.println("*******  Finished Tests  *****"); 
+  Serial.println("*******************************\n");  
   
   delay(5000);
   lcd.clear();

@@ -17,7 +17,7 @@ DallasTemperature DS18B20sensors(&oneWireDS18B20);
 ZSensor zensors[9];          // List of sensors with attributes
 const int buttonPin = 7;     // Pin connected to pushbutton
 const int hallPin = 8;        // Pin connected to Hall sensor
-int currSensor = 1;          // Indicates the sensor currently displayed on the LCD screen
+int currentSensorIndex = 0;          // Indicates the sensor currently displayed on the LCD screen
 bool lastButtonState = LOW;
 int lastId;
 String lastValPrinted;
@@ -55,29 +55,21 @@ int getRpm(){
       if(testDeltaMillis > 2000){
         normalOps = false;
         String strTestDeltaMillis = String(testDeltaMillis);
-        //Serial.print("Took too long.  Milliseconds between change: ");
-        //Serial.println(strTestDeltaMillis);
       }
     }
 
-    // Taking too long to get a reading
     if (!normalOps){
-      //Serial.print("Abnormal Operations");
-      return -1;
+      return 0;
     }
-
     String sensorState = String(hallReading);
   }
 
   // Milliseconds for 10 revolutions
   deltaMillis = millis() - startTime;
   String strDeltaMillis = String(deltaMillis);
-  //Serial.print("Milliseconds for 10 revolutions: " + strDeltaMillis);
 
   float oneRev = deltaMillis / 10;
-
   float fltRpm = 60000 / oneRev;
-
   rpm = (int) fltRpm;  
 
   return rpm;
@@ -91,31 +83,31 @@ void printSensor(int Id, String value){
     lcd.setCursor(0, 0);
 
     switch (Id) {
-      case 0:
+      case 1:
         lcd.print("Raw Water In");
         break;
-      case 1:
+      case 2:
         lcd.print("Raw Water Out");
         break;
-      case 2:
+      case 3:
         lcd.print("Coolant In");
         break;
-      case 3:
+      case 4:
         lcd.print("Coolant Out");
         break;
-      case 4:
+      case 5:
         lcd.print("Cylinder Head");
         break;
-      case 5:
+      case 6:
         lcd.print("Engine Room");
         break;
-      case 6:
+      case 7:
         lcd.print("Exhaust");
         break;
-      case 7:
+      case 8:
         lcd.print("Oil");
         break;
-      case 8:
+      case 9:
         lcd.print("RPM");
         break;                                                        
       default: 
@@ -164,8 +156,7 @@ void displaySensor(ZSensor sensor){
 
 
 void setup() {
-  //Serial.begin(9600);
-  //Serial.println("Begin setup");
+  Serial.begin(9600);
   
   pinMode(buttonPin, INPUT);
   pinMode(hallPin, INPUT);
@@ -178,10 +169,8 @@ void setup() {
   delay(500);
   MAX31850sensors.begin();
   DS18B20sensors.begin();
-  
-  //Serial.println("Complete setup");
-
 }
+
 
 void loop() {
 
@@ -194,18 +183,17 @@ void loop() {
   }
   
   if (digitalRead(buttonPin) == LOW && lastButtonState == HIGH) {
-    //Serial.println("Button Released");
     printWorking();
     // Move to the next sensor
-    if (currSensor < 9){
-      currSensor++;
+    if (currentSensorIndex < 8){
+      currentSensorIndex++;
     } else {
-      currSensor = 1;
+      currentSensorIndex = 0;
     }
     lastButtonState = LOW;
   } 
-  
-  displaySensor(zensors[currSensor - 1]);
+  Serial.print("Current Sensor Index: "); Serial.println(currentSensorIndex);
+  displaySensor(zensors[currentSensorIndex]);
 
 }
 
