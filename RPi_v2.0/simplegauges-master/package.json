@@ -1,0 +1,22 @@
+{
+  "name": "simplegauges",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run watch",
+    "build": "webpack -p --devtool source-map",
+    "watch": "webpack -d --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "signalk-client": "signalk/signalk-js-client",
+    "ws": "^0.4.32"
+  },
+  "devDependencies": {
+    "json-loader": "^0.5.4",
+    "webpack": "^1.12.9"
+  }
+}

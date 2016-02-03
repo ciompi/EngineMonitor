@@ -1,0 +1,13 @@
+Shell into the RPI using Putty
+Username: pi
+Password: raspberry
+
+Determine the IP address of the RPi:
+ifconfig /a
+
+Ensure you are in the /home/pi directory and the file you want to run is in there
+
+Execute:
+sudo python getValues.py
+
+Open a browser and navigate to http://10.0.0.5/

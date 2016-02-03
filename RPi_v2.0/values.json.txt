@@ -1,0 +1,11 @@
+{ 
+	"Raw Water In" : 58.1, 
+	"Raw water Out" : 82.2, 
+	"Coolant Entering Heat Exchanger" : 173.3, 
+	"Coolant Exiting Heat Exchanger" : 132.4, 
+	"Cylinder Head" : 182.5, 
+	"Engine Room" : 88.6, 
+	"Oil " : 178.7, 
+	"Exhaust Gas" : 473.8, 
+	"RPM" : 2400
+}
