@@ -18,7 +18,7 @@
     "react-grid-layout": "^0.6.1",
     "signalk-schema": "SignalK/specification",
     "signalk-client": "SignalK/signalk-js-client",
-    "ws": "^0.7.1"
+    "ws": "^7.2.0"
   },
   "devDependencies": {
     "babel-loader": "^5.3.2",
